@@ -1,128 +1,110 @@
 import os
 import msvcrt
 import typer
-import sys
-from typing import List, Callable, Dict, Any, Optional
-
-class MenuSystem:
-    @staticmethod
-    def clear_screen():
-        os.system('cls' if os.name == 'nt' else 'clear')
-
-    @staticmethod
-    def print_menu(options: List[str], selected: int, title: str):
-        MenuSystem.clear_screen()
-        
-        styled_title = typer.style(f"{title}", fg=typer.colors.CYAN, bold=True)
-        typer.echo(styled_title)
-        
-        separator = typer.style("─" * len(title), fg=typer.colors.CYAN)
-        typer.echo(f"{separator}\n")
-
-        for idx, option in enumerate(options):
-            if idx == selected:
-                typer.echo(typer.style(f"> {option}", fg = typer.colors.MAGENTA, bold=True))
-            else:
-                typer.echo(typer.style(f"  {option}", fg=typer.colors.WHITE))
-
-    @staticmethod
-    def get_key():
-        try:
-            key = msvcrt.getch()
-            return msvcrt.getch() if key == b'\xe0' else key
-        except KeyboardInterrupt:
-            sys.exit(0)
-
-    @classmethod
-    def menu_selection(cls, options: List[str], title: str):
-        selected = 0
-        while True:
-            cls.print_menu(options, selected, title)
-            key = cls.get_key()
-            if key == b'H':  # Flèche haut
-                selected = (selected - 1) % len(options)
-            elif key == b'P':  # Flèche bas
-                selected = (selected + 1) % len(options)
-            elif key == b'\r':  # Touche Entrée
-                return selected
-
-def create_menu(options: List[str], actions: List[Callable], title: str = "Menu Principal", is_main_menu: bool = True):
-    if len(options) != len(actions):
-        raise ValueError("Le nombre d'options doit correspondre au nombre d'actions.")
-    
-    if is_main_menu:
-        options.append("Quitter")
-        actions.append(lambda: sys.exit(0))
-    else:
-        options.append("Retour au menu précédent")
-        actions.append(lambda: None)
-        options.append("Quitter")
-        actions.append(lambda: sys.exit(0))
-    
-    while True:
-        choice = MenuSystem.menu_selection(options, title)
-        if choice == len(options) - 1:  # Dernière option (Quitter)
-            actions[choice]()  # Exécute sys.exit(0)
-        elif not is_main_menu and choice == len(options) - 2:  # Avant-dernière option (Retour au menu précédent)
-            return
-        else:
-            typer.clear()
-            action = actions[choice]
-            if callable(action):
-                result = action()
-                if isinstance(result, bool) and result:  # Si l'action renvoie True, on quitte le programme
-                    sys.exit(0)
-            elif isinstance(action, dict):  # Sous-menu
-                create_menu(action['options'], action['actions'], action['title'], is_main_menu=False)
-            else:
-                typer.echo("\nAction non valide.")
-            if not isinstance(action, dict):  # Ne pas afficher ce message pour les sous-menus
-                typer.echo("\nAppuyez sur une touche pour revenir au menu...")
-                msvcrt.getch()
-
+from typing import List, Callable
 
 def main_menu(options: List[str], actions: List[Callable], title: str = "Menu Principal"):
-    create_menu(options, actions, title, is_main_menu=True)
+    menu_structure = create_menu_structure(options, actions, title)
+    run_menu(menu_structure)
 
+class MenuSystem:
+    def clear_screen(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
 
-
-
-
-def create_submenu(options: List[str], actions: List[Callable], title: str = "Sous-menu"):
-    return {'options': options, 'actions': actions, 'title': title}
-
-def execute_menu_item(menu_structure: Dict[str, Any], item_path: str):
-    parts = item_path.split('.')
-    current_menu = menu_structure
-    
-    for part in parts:
-        idx = int(part) - 1
-        if idx < 0 or idx >= len(current_menu['options']):
-            typer.echo(f"Invalid menu path: {item_path}")
-            return
-        if isinstance(current_menu['actions'][idx], dict):
-            current_menu = current_menu['actions'][idx]
-            if part == parts[-1]:  # If this is the last part and it's a submenu
-                typer.echo(f"Vous tentez d'executer le sous menu : {current_menu['title']} n° {part}") 
-                for i, option in enumerate(current_menu['options'], 1):
-                    typer.echo(f"utilisez {part}.{i} pour le sous menu {option}")
-        else:
-            action = current_menu['actions'][idx]
-            if callable(action):
-                action()
+    def print_menu(self, title, options, selected_index):
+        self.clear_screen()
+        typer.echo(typer.style(title, fg=typer.colors.BLUE, bold=True))
+        typer.echo("─────────")
+        for i, option in enumerate(options):
+            option_label = option['label'] if isinstance(option, dict) else option
+            # Remove any existing numbering from the option label
+            option_label = option_label.split('. ', 1)[-1] if '. ' in option_label else option_label
+            display_label = f"{i + 1}. {option_label}"
+            if i == selected_index:
+                typer.echo(typer.style(f"> {display_label}", fg=typer.colors.MAGENTA, bold=True))
             else:
-                typer.echo("Invalid action")
-            return
+                typer.echo(f"  {display_label}")
 
-def run_menu(menu_structure: Dict[str, Any], item_path: Optional[str] = None):
+    def get_key(self):
+        return msvcrt.getch()
+
+    def menu_selection(self, title, options):
+        selected_index = 0
+        while True:
+            self.print_menu(title, options, selected_index)
+            key = self.get_key()
+            if key == b'\r':  # Enter key
+                return selected_index
+            elif key == b'\x1b':  # Escape key
+                return 'escape'
+            elif key == b'H':  # Up arrow
+                selected_index = (selected_index - 1) % len(options)
+            elif key == b'P':  # Down arrow
+                selected_index = (selected_index + 1) % len(options)
+
+def create_menu_structure(options, actions, title, path='', is_submenu=False):
+    menu_system = MenuSystem()
+    options_with_indicator = []
+
+    for option, action in zip(options, actions):
+        if isinstance(action, dict):
+            if isinstance(option, dict):
+                # Remove any existing '+' before adding a new one
+                option['label'] = option['label'].rstrip(' +') + ' +'
+                options_with_indicator.append(option)
+            else:
+                # Remove any existing '+' before adding a new one
+                options_with_indicator.append(option.rstrip(' +') + ' +')
+        else:
+            # Remove any existing '+' from non-submenu options
+            options_with_indicator.append(option.rstrip(' +') if isinstance(option, str) else option)
+
+    return {
+        "title": f"{path} {title}".strip(),
+        "options": options_with_indicator,
+        "actions": actions,
+        "menu_system": menu_system,
+        "is_submenu": is_submenu,
+        "path": path
+    }
+
+
+
+def run_menu(menu_structure, item_path=None):
+    menu_system = menu_structure["menu_system"]
     if item_path:
         execute_menu_item(menu_structure, item_path)
     else:
-        main_menu(menu_structure['options'], menu_structure['actions'], menu_structure.get('title', 'Menu Principal'))
+        while True:
+            selected_index = menu_system.menu_selection(menu_structure["title"], menu_structure["options"])
+            if selected_index == 'escape':
+                break
+            action = menu_structure["actions"][selected_index]
+            if callable(action):
+                action()
+                input("\nPress Enter to return to the menu...")
+            elif isinstance(action, dict):
+                new_path = f"{menu_structure['path']}{selected_index + 1}."
+                run_menu(create_menu_structure(action["options"], action["actions"], action["title"], new_path, True))
 
-def create_menu_structure(options: List[str], actions: List[Callable], title: str = "Menu Principal") -> Dict[str, Any]:
-    return {
-        'options': options,
-        'actions': actions,
-        'title': title
-    }
+def create_submenu(options, actions, title):
+    submenu_options = [{"label": option} for option in options]
+    return create_menu_structure(submenu_options, actions, title, is_submenu=True)
+
+def execute_menu_item(menu_structure, item_path):
+    path_parts = item_path.split('.')
+    current_menu = menu_structure
+    for part in path_parts:
+        try:
+            index = int(part) - 1
+            action = current_menu["actions"][index]
+            if callable(action):
+                action()
+                return
+            elif isinstance(action, dict):
+                current_menu = action
+            else:
+                raise ValueError("Invalid menu path")
+        except (ValueError, IndexError):
+            typer.echo(typer.style("Invalid menu path", fg=typer.colors.RED))
+            return

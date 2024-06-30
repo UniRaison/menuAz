@@ -3,59 +3,26 @@ import typer
 from typing import Optional
 
 def option1():
-    typer.echo(typer.style("Exécution de l'option 1", fg=typer.colors.MAGENTA))
+    print("Executing option 1")
 
 def option2():
-    typer.echo(typer.style("Exécution de l'option 2", fg=typer.colors.CYAN))
-
-def sub_sub_menu1():
-    return create_submenu(
-        ["Sous-sous-option", "Sous-sous-option"],
-        [
-            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 1", fg=typer.colors.YELLOW)),
-            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 2", fg=typer.colors.BLUE))
-        ],
-        "Sous-sous-menu"
-    )
-
-def sub_sub_menu2():
-    return create_submenu(
-        ["Sous-sous-option", "Sous-sous-option", "Sous-sous-sous-menu"],
-        [
-            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 1", fg=typer.colors.GREEN)),
-            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 2", fg=typer.colors.RED)),
-            sub_sub_sub_menu()
-        ],
-        "Sous-sous-menu"
-    )
-
-def sub_sub_sub_menu():
-    return create_submenu(
-        ["Sous-sous-sous-option", "Sous-sous-sous-option"],
-        [
-            lambda: typer.echo(typer.style("Exécution de la sous-sous-sous-option 1", fg=typer.colors.WHITE)),
-            lambda: typer.echo(typer.style("Exécution de la sous-sous-sous-option 2", fg=typer.colors.MAGENTA))
-        ],
-        "Sous-sous-sous-menu"
-    )
+    print("Executing option 2")
 
 def submenu():
     return create_submenu(
-        ["Sous-option", "Sous-option", "Sous-sous-menu", "Sous-sous-menu"],
+        ["Suboption 1", "Suboption 2"],
         [
-            lambda: typer.echo(typer.style("Exécution de la sous-option 1", fg=typer.colors.RED)),
-            lambda: typer.echo(typer.style("Exécution de la sous-option 2", fg=typer.colors.GREEN)),
-            sub_sub_menu1(),
-            sub_sub_menu2()
+            lambda: print("Executing suboption 1"),
+            lambda: print("Executing suboption 2")
         ],
-        "Menu Secondaire"
+        "Submenu"
     )
 
 def main(item_path: Optional[str] = typer.Argument(None)):
     menu_structure = create_menu_structure(
-        ["Option", "Option", "Sous-menu"],
+        ["Option 1", "Option 2", "Submenu"],
         [option1, option2, submenu()],
-        "Menu Principal"
+        "Main Menu"
     )
     run_menu(menu_structure, item_path)
 
