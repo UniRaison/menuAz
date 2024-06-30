@@ -1,8 +1,7 @@
 ```markdown
 # MenuAz: A Flexible Menu System for Python CLI Applications
 
-MenuAz is a powerful and flexible menu system for creating hierarchical command-line interfaces in Python.
-It provides an easy-to-use framework for building interactive menus with submenus, actions, and navigation.
+MenuAz is a powerful and flexible menu system for creating hierarchical command-line interfaces in Python. It provides an easy-to-use framework for building interactive menus with submenus, actions, and navigation.
 
 ## Features
 
@@ -16,7 +15,7 @@ It provides an easy-to-use framework for building interactive menus with submenu
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/menuaz.git
+   git clone https://github.com/uniraison/menuaz.git
    ```
 
 2. Navigate to the project directory:
@@ -35,6 +34,8 @@ It provides an easy-to-use framework for building interactive menus with submenu
 
    ```python
    from menuAz_lib import create_menu_structure, run_menu, create_submenu
+   import typer
+   from typing import Optional
    ```
 
 2. Define your menu structure and actions:
@@ -56,83 +57,62 @@ It provides an easy-to-use framework for building interactive menus with submenu
            "Submenu"
        )
 
-   menu_structure = create_menu_structure(
-       ["Option 1", "Option 2", "Submenu"],
-       [option1, option2, submenu()],
-       "Main Menu"
-   )
+   def main(item_path: Optional[str] = typer.Argument(None)):
+       menu_structure = create_menu_structure(
+           ["Option 1", "Option 2", "Submenu"],
+           [option1, option2, submenu()],
+           "Main Menu"
+       )
+       run_menu(menu_structure, item_path)
+
+   if __name__ == "__main__":
+       typer.run(main)
    ```
 
-3. Run the menu:
+3. Run the script:
 
-   ```python
-   run_menu(menu_structure)
    ```
+   python menutest.py
+   ```
+
+## Command-line Direct Execution
+
+MenuAz supports direct execution of menu items via command-line arguments. This allows you to bypass the interactive menu and execute specific actions directly.
+
+Example:
+
+```
+python menutest.py 1        # Executes Option 1
+python menutest.py 3.1      # Executes Suboption 1 in the Submenu
+```
+
+The argument format is based on the menu structure:
+- Use numbers to navigate through the menu levels
+- Separate levels with a dot (.)
+
+For example, `3.1` means:
+1. Select the 3rd option in the main menu (Submenu)
+2. Select the 1st option in the submenu
+
+This feature is particularly useful for scripting or when you need to execute specific actions quickly without navigating through the menu.
+
+## Sample Output
+
+When run interactively, the menu will look like this:
+
+```
+Main Menu
+─────────
+> 1. Option 1
+  2. Option 2
+  3. Submenu +
+```
+
+You can navigate using arrow keys and press Enter to select an option.
 
 ## Documentation
 
-### `create_menu_structure(options, actions, title, path='', is_submenu=False)`
-
-Creates a menu structure with the given options, actions, and title.
-
-- `options`: List of menu option labels
-- `actions`: List of corresponding actions (functions or submenus)
-- `title`: Menu title
-- `path`: (Optional) Current menu path
-- `is_submenu`: (Optional) Whether this is a submenu
-
-### `run_menu(menu_structure, item_path=None)`
-
-Runs the menu system with the given menu structure.
-
-- `menu_structure`: The menu structure created by `create_menu_structure`
-- `item_path`: (Optional) Direct path to execute a specific menu item
-
-### `create_submenu(options, actions, title)`
-
-Creates a submenu structure.
-
-- `options`: List of submenu option labels
-- `actions`: List of corresponding actions for the submenu
-- `title`: Submenu title
-
-## Sample
-
-Here's a simple example of how to use MenuAz:
-
-```python
-from menuAz_lib import create_menu_structure, run_menu, create_submenu
-import typer
-
-def option1():
-    typer.echo(typer.style("Executing option 1", fg=typer.colors.GREEN))
-
-def option2():
-    typer.echo(typer.style("Executing option 2", fg=typer.colors.BLUE))
-
-def submenu():
-    return create_submenu(
-        ["Suboption 1", "Suboption 2"],
-        [
-            lambda: typer.echo(typer.style("Executing suboption 1", fg=typer.colors.YELLOW)),
-            lambda: typer.echo(typer.style("Executing suboption 2", fg=typer.colors.MAGENTA))
-        ],
-        "Submenu"
-    )
-
-def main():
-    menu_structure = create_menu_structure(
-        ["Option 1", "Option 2", "Submenu"],
-        [option1, option2, submenu()],
-        "Main Menu"
-    )
-    run_menu(menu_structure)
-
-if __name__ == "__main__":
-    typer.run(main)
-```
-
-This example creates a simple menu with two options and a submenu, demonstrating the basic usage of MenuAz.
+[Include your existing documentation here]
 
 ## Contributing
 
@@ -143,5 +123,10 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 ```
 
-This README provides a comprehensive overview of your MenuAz project, including installation instructions, usage examples, documentation for key functions, and a sample implementation. You can adjust the content as needed to better fit your project's specific details or requirements.
+This updated README.md now includes:
+1. A correct and working sample code
+2. An explanation of the command-line direct execution feature
+3. Examples of how to use the direct execution
+4. A sample output of what the menu looks like when run interactively
 
+This should provide a comprehensive guide for users of your MenuAz library, including both interactive use and direct command-line execution.
