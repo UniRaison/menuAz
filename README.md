@@ -1,8 +1,11 @@
 ```markdown
 # MenuAz: A Flexible Menu System for Python CLI Applications
 
-MenuAz is a powerful and flexible menu system for creating hierarchical command-line interfaces in Python.
-It provides an easy-to-use framework for building interactive menus with submenus, actions, and navigation.
+MenuAz is a powerful and flexible menu system for creating
+hierarchical command-line interfaces in Python.
+It provides an easy-to-use framework for building
+interactive menus with submenus, actions, and navigation
+that can be also used in direct cmd line.
 
 ## Features
 
