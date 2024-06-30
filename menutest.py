@@ -10,28 +10,28 @@ def option2():
 
 def sub_sub_menu1():
     return create_submenu(
-        ["Sous-sous-option 1.1", "Sous-sous-option 1.2"],
+        ["Sous-sous-option", "Sous-sous-option"],
         [
-            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 1.1", fg=typer.colors.YELLOW)),
-            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 1.2", fg=typer.colors.BLUE))
+            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 1", fg=typer.colors.YELLOW)),
+            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 2", fg=typer.colors.BLUE))
         ],
-        "Sous-sous-menu 1"
+        "Sous-sous-menu"
     )
 
 def sub_sub_menu2():
     return create_submenu(
-        ["Sous-sous-option 2.1", "Sous-sous-option 2.2", "Sous-sous-sous-menu"],
+        ["Sous-sous-option", "Sous-sous-option", "Sous-sous-sous-menu"],
         [
-            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 2.1", fg=typer.colors.GREEN)),
-            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 2.2", fg=typer.colors.RED)),
+            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 1", fg=typer.colors.GREEN)),
+            lambda: typer.echo(typer.style("Exécution de la sous-sous-option 2", fg=typer.colors.RED)),
             sub_sub_sub_menu()
         ],
-        "Sous-sous-menu 2"
+        "Sous-sous-menu"
     )
 
 def sub_sub_sub_menu():
     return create_submenu(
-        ["Sous-sous-sous-option 1", "Sous-sous-sous-option 2"],
+        ["Sous-sous-sous-option", "Sous-sous-sous-option"],
         [
             lambda: typer.echo(typer.style("Exécution de la sous-sous-sous-option 1", fg=typer.colors.WHITE)),
             lambda: typer.echo(typer.style("Exécution de la sous-sous-sous-option 2", fg=typer.colors.MAGENTA))
@@ -41,7 +41,7 @@ def sub_sub_sub_menu():
 
 def submenu():
     return create_submenu(
-        ["Sous-option 1", "Sous-option 2", "Sous-sous-menu 1", "Sous-sous-menu 2"],
+        ["Sous-option", "Sous-option", "Sous-sous-menu", "Sous-sous-menu"],
         [
             lambda: typer.echo(typer.style("Exécution de la sous-option 1", fg=typer.colors.RED)),
             lambda: typer.echo(typer.style("Exécution de la sous-option 2", fg=typer.colors.GREEN)),
@@ -53,7 +53,7 @@ def submenu():
 
 def main(item_path: Optional[str] = typer.Argument(None)):
     menu_structure = create_menu_structure(
-        ["Option 1", "Option 2", "Sous-menu"],
+        ["Option", "Option", "Sous-menu"],
         [option1, option2, submenu()],
         "Menu Principal"
     )
