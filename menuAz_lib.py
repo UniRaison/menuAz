@@ -3,6 +3,12 @@ import msvcrt
 import typer
 from typing import List, Callable
 
+def wait_for_enter_or_escape(self):
+    while True:
+        key = self.get_key()
+        if key in [b'\r', b'\x1b']:  # Enter or Escape key
+            return
+
 def main_menu(options: List[str], actions: List[Callable], title: str = "Menu Principal"):
     menu_structure = create_menu_structure(options, actions, title)
     run_menu(menu_structure)
@@ -82,10 +88,15 @@ def run_menu(menu_structure, item_path=None):
             action = menu_structure["actions"][selected_index]
             if callable(action):
                 action()
-                input("\nPress Enter to return to the menu...")
+                typer.echo("\nAppuyez sur Entrée ou Échap pour retourner au menu...")
+                while True:
+                    key = menu_system.get_key()
+                    if key in [b'\r', b'\x1b']:  # Touche Entrée ou Échap
+                        break
             elif isinstance(action, dict):
                 new_path = f"{menu_structure['path']}{selected_index + 1}."
                 run_menu(create_menu_structure(action["options"], action["actions"], action["title"], new_path, True))
+
 
 def create_submenu(options, actions, title):
     submenu_options = [{"label": option} for option in options]
